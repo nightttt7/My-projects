@@ -1,0 +1,401 @@
+Sub 打分淘汰系统()
+Application.ScreenUpdating = False '关闭屏幕刷新
+Sheets("折线图").Cells.Clear        '清除单元格内容
+Sheets("单根对比").Cells.Clear      '清除单元格内容
+'=============================
+' 数据格式：
+'
+'第一排：
+'第二排：         品种和模型
+'第一列：日期
+'      1          净值数据
+'      2          净值数据
+'====获取原数据的格式，参数信息，绘制表头等==========================
+Dim pzs As Long                     '品种数
+Worksheets("数据").Select
+Cells(3, 2).Select
+pzs = (Selection.End(xlToRight).Column - 1)
+
+Dim rqs As Long                     '日期数
+Worksheets("数据").Select
+Cells(3, 2).Select
+rqs = (Selection.End(xlDown).Row - 2)
+
+Dim k1 As Long                      '净利润开始算的时间
+k1 = Worksheets("评分淘汰").Cells(10, 3)
+Dim k2 As Long                       '净利润结束算的时间
+k2 = Worksheets("评分淘汰").Cells(11, 3)
+Worksheets("评分淘汰").Cells(11, 5).Value = k2 - k1 + 1  '输出计算了多少天的净利润
+
+Dim N1, N2, N3, M1, M2, M3, N4, M4 As Long     '表头的制作
+N1 = Worksheets("评分淘汰").Cells(5, 3)
+N2 = Worksheets("评分淘汰").Cells(5, 4)
+N3 = Worksheets("评分淘汰").Cells(5, 5)
+M1 = Worksheets("评分淘汰").Cells(6, 3)
+M2 = Worksheets("评分淘汰").Cells(6, 4)
+M3 = Worksheets("评分淘汰").Cells(6, 5)
+For N4 = N1 To N2 Step N3
+Worksheets("评分淘汰").Cells(19 + (N4 - N1) / N3, 2) = N4
+Next N4
+For M4 = M1 To M2 Step M3
+Worksheets("评分淘汰").Cells(18, 3 + (M4 - M1) / M3) = M4
+Next M4
+
+'绝对指标的输入，乘以初始合约金额1000000
+Dim jdzb
+jdzb = Worksheets("评分淘汰").Cells(7, 3).Value * 1000000
+
+Dim bg As Integer                           '读取输出表格的参数
+bg = Worksheets("评分淘汰").Cells(12, 3)        '（1：最后一天的净值，2：最后一天的净利润， 3：最大回撤 ，4：收益风险比）
+If bg = 1 Then
+Worksheets("评分淘汰").Cells(18, 2) = "最后一天的净值"
+End If
+If bg = 2 Then
+Worksheets("评分淘汰").Cells(18, 2) = "最后一天的净利润"
+End If
+If bg = 3 Then
+Worksheets("评分淘汰").Cells(18, 2) = "最大回撤"
+End If
+If bg = 4 Then
+Worksheets("评分淘汰").Cells(18, 2) = "收益风险比"
+End If
+
+Worksheets("评分淘汰").Cells(17, 2) = "原版" & Worksheets("评分淘汰").Cells(18, 2)    '“原版的什么？”的提示
+
+Dim jyf As Long   '每次交易的费用
+jyf = Worksheets("评分淘汰").Cells(9, 3)    '读取每次交易的预计交易费用
+Dim kljyfy As Integer
+kljyfy = Worksheets("评分淘汰").Cells(8, 3) '是否考虑交易费用变化
+
+
+
+
+'============================================================================
+'============================资金线数据的抓取================================
+Dim arr                                                 '资金线原数据     arr
+arr = Sheets("数据").Cells(3, 2).Resize(rqs, pzs).Value '将原数据赋值给2维数组arr
+
+Dim brr()         '每日资金线变动量   brr
+ReDim brr(2 To rqs, 1 To pzs)
+Dim i, j As Long
+For j = 1 To pzs
+    For i = 2 To rqs
+        brr(i, j) = arr(i, j) - arr(i - 1, j)
+    Next i
+Next j
+
+'===================输出原版的数据===================================
+
+Dim mrr()           '这个数组放的是这一天相对上一天的资金线（总）变化值
+Dim nrr()           '这天的净值
+
+ReDim mrr(k1 To k2) '求的是K1到K2这段时间的资金线变动
+For i = k1 To k2
+    mrr(i) = 0            'mrr赋初始值0
+Next i
+For i = k1 To k2
+    For j = 1 To pzs
+        mrr(i) = mrr(i) + brr(i, j)              '计算这天的总净值变化
+    Next j
+Next i
+ReDim nrr(k1 - 1 To k2)                           '求得是某一天的净值
+nrr(k1 - 1) = 1000000 * pzs
+For i = k1 To k2
+    nrr(i) = nrr(i - 1) + mrr(i)
+Next i
+
+If bg = 1 Then
+Worksheets("评分淘汰").Cells(17, 3) = nrr(k2)
+End If
+
+If bg = 2 Then
+Worksheets("评分淘汰").Cells(17, 3) = nrr(k2) - nrr(k1 - 1)
+End If
+
+If bg = 3 Then
+Worksheets("评分淘汰").Cells(17, 3) = hc(nrr)
+End If
+
+If bg = 4 Then
+Worksheets("评分淘汰").Cells(17, 3) = (nrr(k2) - nrr(k1)) / hc(nrr) * (-1)
+End If
+
+Dim jy As Long    '交易次数
+Dim jy0 As Long   '原版交易次数
+jy0 = 0           '给原版交易次数赋初值0
+For j = 1 To pzs
+    For i = k1 To k2 - 1
+        If brr(i, j) = 0 Then
+            If brr(i + 1, j) <> 0 Then
+                jy0 = jy0 + 1
+            End If
+        End If
+    Next i
+Next j
+
+'在折线图中 输出原版的总资金线 以及这个工作表的表头
+
+Worksheets("折线图").Cells(1, 2) = "总资金线"
+Worksheets("折线图").Cells(1, 2) = "原版"
+Worksheets("折线图").Cells(1, 3) = "参数组编号"
+Worksheets("折线图").Cells(2, 3) = "N"
+Worksheets("折线图").Cells(3, 1) = "天数"
+Worksheets("折线图").Cells(3, 3) = "M"
+For i = k1 To k2
+    Worksheets("折线图").Cells(i - k1 + 4, 1) = i - k1 + 1    '在第一列输出天数
+    Worksheets("折线图").Cells(i - k1 + 4, 2) = nrr(i)        '在第二列输出原版的资金线
+Next i
+
+'======================大循环，计算并输出表格======================
+Dim m, n As Long                  '列表的参数
+Dim drr() As Single               'N日回归值
+Dim err()                         '调整后的当日资金变化
+Dim frr()                         '用于计算N日回归
+Dim grr()                         '用于计算排名
+Dim hrr()                         '调整后当日的资金变化
+Dim o                             '相对指标的阈值
+Dim q                             'LINEST有两个值
+Dim r As Single                   'q的中间传递变量
+Dim bianhao As Long               '参数组的编号
+bianhao = 1                       '编号赋初值
+
+
+For n = N1 To N2 Step N3          'N日回归
+    ReDim drr(n To rqs, 1 To pzs) 'drr的范围
+        For i = n To rqs
+            For j = 1 To pzs
+                ReDim frr(1 To n)
+                For k = 1 To n
+                frr(k) = arr(i - n + k, j)
+                Next k
+                q = Application.WorksheetFunction.LinEst(frr)
+                r = q(1)
+                drr(i, j) = r
+            Next j
+        Next i                '计算在某一回归周期的每个品种的每一天的drr结束
+        For m = M1 To M2 Step M3             'M名淘汰
+                ReDim grr(1 To pzs)
+                ReDim hrr(n + 1 To rqs, 1 To pzs)
+                ReDim irr(n + 1 To rqs, 1 To pzs)
+                For i = n To rqs - 1
+                    For j = 1 To pzs
+                    grr(j) = drr(i, j)
+                    Next j
+                    o = Application.WorksheetFunction.Small(grr, m)          '第M小的，就是第（pzs-M+1）大的，不要混
+                    For k = 1 To pzs
+                        If drr(i, k) > o Then
+                            If drr(i, k) >= jdzb Then      '如果M处存在重复排名，那么重复的几个都会不做，这天实际做的可能会比设定的少
+                                hrr(i + 1, k) = brr(i + 1, k)          '评分淘汰后的变化
+                            Else:
+                                hrr(i + 1, k) = 0
+                            End If
+                        Else:
+                            hrr(i + 1, k) = 0
+                        End If
+                    Next k
+                Next i                                 '打分淘汰后的每日资金变动量已经计算完毕了
+ '对交易次数的处理
+                jy = 0
+                For j = 1 To pzs
+                    For i = k1 To k2 - 1
+                        If hrr(i, j) = 0 Then
+                            If hrr(i + 1, j) <> 0 Then
+                                jy = jy + 1
+                            End If
+                        End If
+                    Next i
+                Next j
+
+'新的输出净利润的方法，数据保留在数组中方便进行下一步操作
+
+                ReDim mrr(k1 To k2) '求的是K1到K2这段时间的资金线变动
+                For i = k1 To k2
+                    mrr(i) = 0            'mrr赋初始值0
+                Next i
+                For i = k1 To k2
+                    For j = 1 To pzs
+                        mrr(i) = mrr(i) + hrr(i, j)              '计算这天的总净值变化
+                    Next j
+                    mrr(i) = mrr(i) * (pzs / (pzs - m))
+                Next i
+                ReDim nrr(k1 - 1 To k2)                           '求得是某一天的净值
+                nrr(k1 - 1) = 1000000 * pzs
+                For i = k1 To k2
+                    nrr(i) = nrr(i - 1) + mrr(i)
+                Next i
+
+                If bg = 1 Then
+                    Worksheets("评分淘汰").Cells(19 + (n - N1) / N3, 3 + (m - M1) / M3) = nrr(k2) - (jy * (pzs / (pzs - m)) - jy0) * jyf * kljyfy
+                End If
+
+                If bg = 2 Then
+                    Worksheets("评分淘汰").Cells(19 + (n - N1) / N3, 3 + (m - M1) / M3) = nrr(k2) - nrr(k1 - 1) - (jy * (pzs / (pzs - m)) - jy0) * jyf * kljyfy
+                End If
+
+                If bg = 3 Then
+                    Worksheets("评分淘汰").Cells(19 + (n - N1) / N3, 3 + (m - M1) / M3) = hc(nrr)
+                End If
+
+                If bg = 4 Then
+                    Worksheets("评分淘汰").Cells(19 + (n - N1) / N3, 3 + (m - M1) / M3) = (nrr(k2) - nrr(k1 - 1) - (jy * (pzs / (pzs - m)) - jy0) * jyf * kljyfy) / hc(nrr) * (-1)
+                End If
+
+'==========================================================================================================================
+'输出每一组参数的总资金线
+                Worksheets("折线图").Cells(1, bianhao + 3) = "参数组" & bianhao
+                Worksheets("折线图").Cells(2, bianhao + 3) = n
+                Worksheets("折线图").Cells(3, bianhao + 3) = m
+                For i = k1 To k2
+                    Worksheets("折线图").Cells(i - k1 + 4, bianhao + 3) = nrr(i)
+                Next i
+                bianhao = bianhao + 1
+'====================================================================================================================
+'输出每一根资金线在这个N/M参数组这段时间的选择情况
+                If n = Worksheets("评分淘汰").Cells(13, 3) Then    '和折线图的NM值保持一致
+                    If m = Worksheets("评分淘汰").Cells(14, 3) Then '和折线图的NM值保持一致
+                        Dim pz As Long        '资金线的编号
+                        Dim jlr1 As Single    '单根的资金线  原版
+                        Dim jlr2 As Single    '单根的资金线  之后
+                        For pz = 1 To pzs
+                            Worksheets("单根对比").Cells(1, pz * 2 - 1) = "第" & pz & "根资金线："
+                            Worksheets("单根对比").Cells(1, pz * 2) = Worksheets("数据").Cells(1, 1 + pz) & Worksheets("数据").Cells(2, 1 + pz)
+                            Worksheets("单根对比").Cells(2, pz * 2 - 1) = "原版"
+                            Worksheets("单根对比").Cells(2, pz * 2) = "打分淘汰后"
+                            jlr1 = 0              '给原版和后来的单根资金线赋初值
+                            jlr2 = 0              '给原版和后来的单根资金线赋初值
+                            For i = k1 To k2
+                                jlr1 = jlr1 + brr(i, pz)
+                                Worksheets("单根对比").Cells(i - k1 + 3, pz * 2 - 1) = 1000000 + jlr1
+                                jlr2 = jlr2 + hrr(i, pz)
+                                Worksheets("单根对比").Cells(i - k1 + 3, pz * 2) = 1000000 + jlr2
+                            Next i
+                        Next pz
+                    End If
+                End If
+'========================================================================================================================
+        Next m
+Next n
+'======结束的时候的操作===========================
+
+
+
+
+
+Worksheets("评分淘汰").Select       '回到结果所在表格，评分淘汰表格
+Application.ScreenUpdating = True  '恢复屏幕刷新
+'===================================================
+End Sub
+'自定义函数：求最大回撤  hc  **不知为何，不能用于工作表 只能用于VBA
+Function hc(rrr As Variant)
+
+Dim up
+up = UBound(rrr)
+Dim down
+down = LBound(rrr)
+
+Dim arr()
+Dim brr()
+Dim i, a As Long
+ReDim arr(down + 1 To up)
+
+For a = down + 1 To up
+    ReDim brr(down To a)
+    For i = down To a
+        brr(i) = rrr(i)
+    Next i
+
+    arr(a) = rrr(a) - Application.WorksheetFunction.max(brr)
+Next a
+
+hc = Application.WorksheetFunction.min(arr)
+
+End Function
+
+
+
+'==========================================it's another file======================================
+
+
+
+Sub 画折线图()
+    
+    Application.ScreenUpdating = False '关闭屏幕刷新
+    
+    Dim t0                                             '空图表
+    Set t0 = ActiveSheet.ChartObjects.Add(0, 0, 0, 0)
+    Sheets("折线图").ChartObjects.Delete                '清除原有的图表
+
+    '==============参数定义和获取========================
+    Dim i, j, k, l, m, n As Long      '循环参数
+    
+    Dim rr, r1, r2, r3, r4 As Range   '定义单元格区域所需参数
+    
+    Dim ts, zs As Long      '天数，组数
+    
+    Worksheets("折线图").Select
+    Cells(4, 4).Select
+    zs = Selection.End(xlToRight).Column - 3
+    
+    Worksheets("折线图").Select
+    Cells(4, 1).Select
+    ts = Selection.End(xlDown).Row
+    
+    Dim tu As ChartObject      '画图chart的定义
+    Dim wz As Range            '画图位置的单元格范围的定义
+    
+    Dim I1
+    I1 = 1                     '1到3的循环
+    
+    '=================================================
+
+
+    '===========对单元格区域的操作================================
+    '选择我们需要操作的工作表
+    Sheets("折线图").Select
+    '将单元格格式设置为居中
+    Cells.Select
+    With Selection
+        .HorizontalAlignment = xlCenter
+        .WrapText = False
+        .Orientation = 0
+        .AddIndent = False
+        .IndentLevel = 0
+        .ShrinkToFit = False
+        .ReadingOrder = xlContext
+        .MergeCells = False
+    End With
+    '更改这个工作表的 列宽
+    Cells.Select
+    Selection.ColumnWidth = 30
+    '更改1 2 3 列的列宽
+    Columns("A:C").Select
+    Selection.ColumnWidth = 12
+    
+    '==============================================================
+    
+    '=================画图正文========================================
+    
+    For i = 1 To zs                                   '给每一组参数+原版 资金线 画图
+    
+        I1 = (i + 2) Mod 3
+        Set r1 = Range(Cells(1, 2), Cells(1, 2))
+        Set r2 = Range(Cells(4, 2), Cells(ts, 2))
+        Set r3 = Range(Cells(1, i + 3), Cells(1, i + 3))
+        Set r4 = Range(Cells(4, i + 3), Cells(ts, i + 3))
+        Set rr = Union(r1, r2, r3, r4)                       '这几排是将表头和数据放在同一个UNION区域里
+        
+        Set wz = Range(Cells(I1 * 15 + 5, 3 + i), Cells(I1 * 15 + 19, 4 + i))
+        Set tu = ActiveSheet.ChartObjects.Add(wz.Left, wz.Top, wz.Width, wz.Height)
+        With tu.Chart
+            .ChartType = xlLine
+            .SetSourceData Source:=rr
+        End With
+    Next i
+    
+    '==========================================================================
+
+    
+Application.ScreenUpdating = True            '恢复屏幕刷新
+Worksheets("折线图").Cells(1, 1).Select      '选取单元格移动到a1
+    
+End Sub

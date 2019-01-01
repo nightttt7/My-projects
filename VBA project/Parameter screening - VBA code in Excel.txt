@@ -1,0 +1,210 @@
+Sub 最优参数筛选()
+    Application.ScreenUpdating = False '关闭屏幕更新，提供运行效率
+
+    Dim i As Long         '循环等变量
+    Dim j As Long
+    Dim k As Long
+    
+    Dim PCount As Long    '原始参数个数
+    Dim PColArr() As Long '参数列号
+    
+    Dim TCount As Long    '优化参数个数
+    Dim TColArr() As Long '优化参数列号
+    
+    Dim TarName As String    '目标函数
+    Dim TarCol1 As Integer   'Sheet2目标函数列
+    Dim TarCol2 As Integer   'Sheet3目标函数列
+    
+    Dim FRange As Integer    '筛选名次
+    Dim TotalRow As Long
+
+    
+    Set MySheet1 = ThisWorkbook.Worksheets("Sheet1")
+    Set MySheet2 = ThisWorkbook.Worksheets("Sheet2")
+    Set MySheet3 = ThisWorkbook.Worksheets("Sheet3")
+    Set MySheet4 = ThisWorkbook.Worksheets("Sheet4")
+    Set MySheet5 = ThisWorkbook.Worksheets("Sheet5")
+    Set MySheet6 = ThisWorkbook.Worksheets("Sheet6")
+    
+    
+    '==========获取配置参数==========
+    PCount = MySheet1.Cells(2, 1)
+    TCount = MySheet1.Cells(4, 1)
+    TarName = MySheet1.Cells(6, 1)
+    FRange = MySheet1.Cells(8, 1)
+   
+    ReDim PColArr(PCount)
+    For i = 1 To PCount
+        PColArr(i) = MySheet1.Cells(2, i + 1)
+    Next i
+    
+    ReDim TColArr(TCount)
+    For i = 1 To TCount
+        TColArr(i) = MySheet1.Cells(4, i + 1)
+    Next i
+    
+    FindC = 0
+    '==========获取目标函数列
+    For i = 1 To 255
+       cFName = MySheet2.Cells(1, i)
+       If StrComp(TarName, cFName, vbTextCompare) = 0 Then
+            TarCol1 = i
+            FindC = FindC + 1
+       End If
+       
+       cFName = MySheet3.Cells(1, i)
+       If StrComp(TarName, cFName, vbTextCompare) = 0 Then
+            TarCol2 = i
+            FindC = FindC + 1
+       End If
+       
+       If FindC = 2 Then
+          Exit For
+       End If
+    Next i
+    
+    MySheet5.Select
+    Cells.Clear
+    
+    MySheet6.Select
+    Cells.Clear
+    
+    '复制行头
+    MySheet3.Select
+    Range(Cells(1, 1), Cells(1, PCount + TCount + 1)).Select
+    Selection.Copy
+    MySheet5.Select
+    Cells(1, 1).Select
+    ActiveSheet.Paste
+    Application.CutCopyMode = False
+        
+    TotalRow = MySheet2.Cells(Application.Rows.Count, 1).End(xlUp).Row
+    
+    'Sheet5数据复制行
+    S5Row = 2
+    
+    For i = 2 To TotalRow
+         MySheet4.Select
+         Cells.Clear
+    
+         MySheet3.Select
+         Cells.Select
+         Selection.AutoFilter
+         
+         ' 筛选条件
+         For j = 1 To PCount
+            PValue = MySheet2.Cells(i, PColArr(j))
+            Selection.AutoFilter Field:=PColArr(j), Criteria1:=PValue
+         Next j
+         
+        FTotalRow = MySheet3.Cells(Application.Rows.Count, 1).End(xlUp).Row
+        Range(Cells(1, 1), Cells(FTotalRow, PCount + TCount + 1)).Select
+        
+        Selection.Copy
+        MySheet4.Select
+        Cells(1, 1).Select
+        ActiveSheet.Paste
+        Application.CutCopyMode = False
+        
+        
+        '按照目标函数降序
+        MySheet4.Select
+        Cells.Select
+        Selection.Sort Key1:=Cells(1, TarCol2), Order1:=xlDescending, Header:=xlYes
+        
+        
+        Range(Cells(2, 1), Cells(FRange + 1, PCount + TCount + 1)).Select
+        Selection.Copy
+        MySheet5.Select
+        Cells(S5Row, 1).Select
+        ActiveSheet.Paste
+        Application.CutCopyMode = False
+        
+        S5Row = S5Row + FRange
+    Next i
+    
+    'Sheet5
+    
+    
+    '复制行头
+    For i = 1 To TCount
+        MySheet6.Cells(1, i) = MySheet5.Cells(1, PCount + i)
+    Next i
+    
+    MySheet6.Cells(1, TCount + 1) = "次数"
+    MySheet6.Cells(1, TCount + 2) = "比例"
+    
+    Dim TKey As String
+    Dim KeyArr() As String
+    Dim CountArr() As Integer
+    Dim DiffCount As Integer
+    
+    TotalRow = MySheet5.Cells(Application.Rows.Count, 1).End(xlUp).Row
+    SumCount = TotalRow - 1
+    
+    ReDim KeyArr(TotalRow - 1)
+    ReDim CountArr(TotalRow - 1)
+    
+    DiffCount = 0
+    For i = 2 To TotalRow
+        For j = 1 To TCount
+            If j <> 1 Then
+                TKey = TKey & "_"
+            End If
+            TKey = TKey & MySheet5.Cells(i, PCount + j)
+        Next j
+        
+        CRes = ArrContain(KeyArr, TKey)
+       
+        If CRes = -1 Then
+            KeyArr(DiffCount) = TKey
+            CountArr(DiffCount) = 1
+            DiffCount = DiffCount + 1
+            For k = 1 To TCount
+                MySheet6.Cells(DiffCount + 1, k) = MySheet5.Cells(i, PCount + k)
+            Next k
+             MySheet6.Cells(DiffCount + 1, TCount + 1) = 1
+        End If
+        
+        If CRes <> -1 Then
+            CountArr(CRes) = CountArr(CRes) + 1
+            MySheet6.Cells(CRes + 2, TCount + 1) = CountArr(CRes)
+        End If
+        
+        TKey = ""
+    Next i
+    
+    'Sheet6
+    TotalRow = MySheet6.Cells(Application.Rows.Count, 1).End(xlUp).Row
+    
+    For i = 2 To TotalRow
+        MySheet6.Cells(i, TCount + 2) = Round(MySheet6.Cells(i, TCount + 1) / SumCount, 2)
+    Next i
+    
+     '按照目标函数降序
+    MySheet6.Select
+    Cells.Select
+    Selection.Sort Key1:=Cells(1, TCount + 1), Order1:=xlDescending, Header:=xlYes
+        
+        
+    MySheet3.Select
+    Cells.Select
+    Selection.AutoFilter
+         
+     MySheet6.Select
+    Application.ScreenUpdating = True '恢复屏幕更新
+End Sub
+
+'字符串数组包含
+Function ArrContain(t As Variant, Str As String)
+  Dim Res As Integer
+  Dim i As Integer
+  Res = -1
+   For i = LBound(t) To UBound(t) - 1
+       If StrComp(t(i), Str, vbTextCompare) = 0 Then
+           Res = i
+           Exit For
+       End If
+    Next i
+  ArrContain = Res
+End Function
