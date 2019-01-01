@@ -1,0 +1,183 @@
+read.char <- function(file,sep = ';') {
+  char <- readChar(con = file, nchars = file.info(file)$size)
+  chars <- strsplit(char,sep)
+  return(chars[[1]])
+}
+
+exe.sql <- function(conn,sql_file_list) {
+  for (sql_file in sql_file_list) {
+    for (sql in read.char(sql_file)) {
+      RODBC::sqlQuery(conn,sql)
+    }
+  }
+}
+
+get.sql <- function(conn,sql_file_list) {
+  for (sql_file in sql_file_list) {
+    for (sql in read.char(sql_file)) {
+      result <- RODBC::sqlQuery(conn,sql)
+      return(result)
+    }
+  }
+}
+
+run.sql <- function(sqls_path = './sqls', exe = 0, get = 1, uid, pwd) {
+  setwd(sqls_path)
+  conn <- RODBC::odbcConnect('impalaodbc', uid = uid, pwd = pwd,
+                      believeNRows = FALSE, DBMSencoding = "UTF-8")
+  sql_file_list <- list.files()
+  if (exe != 0) {
+    exe.sql(conn,sql_file_list[exe])
+  }
+  result <- get.sql(conn,sql_file_list[get])
+  RODBC::odbcClose(conn)
+  setwd('..')
+  return(result)
+}
+
+run.sql2 <- function(sqls_path = './sqls', exe = 0, get = 1, uid, pwd) {
+  setwd(sqls_path)
+  conn <- RODBC::odbcConnect('impalaodbc', uid = uid, pwd = pwd,
+                             believeNRows = FALSE, DBMSencoding = "UTF-8")
+  sql_file_list <- list.files()
+  if (exe != 0) {
+    exe.sql(conn,sql_file_list[exe])
+  }
+  result <- list()
+  for (i in get) {
+    result[[i]] <- get.sql(conn,sql_file_list[i])
+  }
+  RODBC::odbcClose(conn)
+  setwd('..')
+  return(result)
+}
+
+
+
+csv_rep <- function(x,csvp='./csvs',csvf,acol=1,bcol=2) {
+  setwd(csvp)
+  df <- read.csv(csvf,header = FALSE,stringsAsFactors=FALSE)
+  l <- as.list(df[,bcol],stringsAsFactors=FALSE)
+  names(l) <- df[,acol]
+  setwd('..')
+  return(l[[x]])
+}
+
+
+
+# 配合ggplot2使用
+multiplot <- function (..., plotlist = NULL, cols = 1, layout = NULL)
+{
+  # 导入grid
+  require(grid)
+  plots <- c(list(...), plotlist)
+  numPlots = length(plots)
+  if (is.null(layout))
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                     ncol = cols, nrow = ceiling(numPlots/cols), byrow=TRUE)
+  if (numPlots == 1) {
+    print(plots[[1]])
+  }
+  else {
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout),
+                                               ncol(layout))))
+    for (i in 1:numPlots) {
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+
+
+
+# output:包含character和data.frame的list
+# xlpath:输出excel的路径,默认为'当前路径/test.xlsx'
+# sheetname:excel的sheet名,默认为'sheet'
+to_excel <- function(output,xlpath='test.xlsx',sheetname='sheet',restyle=TRUE ,pp_locs=0,hl_locs=0){
+  # 导入XLConnect
+  require(XLConnect)
+  # creatxl:创建book和sheet
+  createxl <- function(){
+    if(file.exists(xlpath)){file.remove(xlpath)}
+    book <- loadWorkbook(xlpath, create = TRUE)
+    book$createSheet(name = sheetname)
+    return(book)
+  }
+  # style:自定义格式
+  style <- function(){
+    setStyleAction(book, XLC$"STYLE_ACTION.NAME_PREFIX")
+    setStyleNamePrefix(book, "s1")
+    # 总体设定
+    s1.Numeric <- createCellStyle(book, name = "s1.Column.Numeric")
+    s1.String <- createCellStyle(book, name = "s1.Column.String")
+    s1.Boolean <- createCellStyle(book, name = "s1.Column.Boolean")
+    s1.DateTime <- createCellStyle(book, name = "s1.Column.DateTimec")
+    setBorder(s1.Numeric,  side = "all", type = XLC$"BORDER.THIN", color = XLC$"COLOR.BLACK")
+    setBorder(s1.String,   side = "all", type = XLC$"BORDER.THIN", color = XLC$"COLOR.BLACK")
+    setBorder(s1.Boolean,  side = "all", type = XLC$"BORDER.THIN", color = XLC$"COLOR.BLACK")
+    setBorder(s1.DateTime, side = "all", type = XLC$"BORDER.THIN", color = XLC$"COLOR.BLACK")
+    # 表头设定
+    s1.Header <- createCellStyle(book, name = "s1.Header")
+    setFillPattern(s1.Header, fill = XLC$"FILL.SOLID_FOREGROUND")
+    setFillForegroundColor(s1.Header, color = XLC$"COLOR.LIGHT_CORNFLOWER_BLUE")
+    setBorder(s1.Header, side = "all", type = XLC$"BORDER.THIN", color = XLC$"COLOR.BLACK")
+
+    # 调整单元格大小
+    wrapStyle <- createCellStyle(book)
+    setWrapText(wrapStyle, wrap = TRUE)
+    setColumnWidth(book, sheet = sheetname, col = 1 , width = 5000)
+    setColumnWidth(book, sheet = sheetname, col = 2:20 , width = 2800)
+  }
+  # append_block:添加多个字符串和数据块的组合向量
+  append_block <- function(output){
+    row <- 1
+    for (x in output){
+      x.df <- x
+      for (x.1 in x){
+        x.ischar <-is.character(x.1)
+      }
+      if (x.ischar){
+        x.df <- data.frame(c(1))
+        names(x.df)=c(x)
+      }
+      writeWorksheet(book, x.df, sheet = sheetname, startRow = row, startCol = 1)
+      row_add <- ifelse(is.character(x), 1, nrow(x)+2)
+      row <- row + row_add
+    }
+  }
+
+  # restyle2和restyle3:修改特定位置的格式
+  # restyle2:百分数
+  restyle2 <- function(locs){
+    setStyleAction(book, XLC$"STYLE_ACTION.XLCONNECT")
+    s <- createCellStyle(book)
+    setDataFormat(s, format = "0.00%")
+    setBorder(s, side = "all", type = XLC$"BORDER.THIN", color = XLC$"COLOR.BLACK")
+    # 设置格式到单元格
+    for (loc in locs) {
+      setCellStyle(book, sheet = sheetname, row = loc[[1]] , col = loc[[2]], cellstyle = s)
+    }
+  }
+  # restyle3:高亮
+  restyle3 <- function(locs){
+    setStyleAction(book, XLC$"STYLE_ACTION.XLCONNECT")
+    s <- createCellStyle(book)
+    setFillPattern(s, fill = XLC$"FILL.SOLID_FOREGROUND")
+    setFillForegroundColor(s, color = XLC$"COLOR.ORANGE")
+    # 设置格式到单元格
+    for (loc in locs) {
+      setCellStyle(book, sheet = sheetname, row = loc[[1]], col = loc[[2]], cellstyle = s)
+    }
+  }
+  # main
+  book <- createxl()
+  style()
+  append_block(output)
+  if (restyle == TRUE) {
+    restyle2(pp_locs)
+    restyle3(hl_locs)
+  }
+  saveWorkbook(book)
+}

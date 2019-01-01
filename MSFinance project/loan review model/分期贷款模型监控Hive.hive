@@ -1,0 +1,35 @@
+/*xxx模型监控Hive*/
+DROP TABLE IF EXISTS risk_analysis.tmp_xxx_xxxmodel;
+CREATE TABLE risk_analysis.tmp_xxx_xxxmodel AS
+SELECT
+substr(a.appl_tm,1,10) appl_tm ,
+a.appl_no appl_no,
+a.appl_status appl_status,
+a.appl_lim appl_lim,
+cast(xpath_string(output,'/Application/@xxx') AS float) bt3_score,
+cast(xpath_string(output,'/Application/xxx/@xxx') AS float)jxlPosScoreV3,
+xpath_string(output,'/Application/xxx/@xxx') AS workflowCode
+FROM
+dsst.gdl_xxx_xxx a
+LEFT JOIN
+dsst.fdl_aprvadt_xxx_xxx_xxx b 
+ON
+a.appl_id=b.appl_id 
+AND 
+b.round_par ='2c' 
+AND 
+b.dt >= 'xxxxxxxx' 
+AND 
+# 日期参数1
+b.dt <= 'xxxxxxxx'
+WHERE 
+a.prod_cd IN ('0000','0000','0000')
+AND
+# 日期参数2
+a.dt='xxxxxxxx' 
+AND
+to_date(a.appl_tm) >= 'xxxxxxxx' 
+AND
+# 日期参数3
+to_date(a.appl_tm) <= 'xxxxxxxx'
+;

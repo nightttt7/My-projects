@@ -1,0 +1,279 @@
+\name{sltool}
+\alias{sltool}
+\title{sltool}
+\usage{
+'请使用?函数名查看'
+}
+\description{
+服务贷实用函数,包含:
+
+get.sql:从放有sql文件的文件夹中读取sql查询语句,然后连接impala,运行sql语句,返回获取的数据;
+
+multiplot:将多个图表合并显示;
+
+to_excel:将多个data.frame和描述性语句根据所需格式生成excel;
+
+csv_rep:根据放有csv文件的文件夹中读取编码表,将输入的编码返回对应的值.
+}
+\examples{
+'请使用?函数名查看'
+}
+
+
+
+
+
+\name{run.sql}
+\alias{run.sql}
+\title{
+run.sql
+}
+\description{
+从放有sql文件的文件夹中读取sql查询语句,然后连接impala,运行sql语句,返回获取的数据
+
+包含两个版本:run.sql和run.sql2,区别见详情内容
+
+文件夹中的sql文件(.txt,.sql等后缀均可)请按运行次序增加数字前缀,比如1_,2_,这个次序后面将称之为'sql编号'
+
+为了方便操作,请保持数字前缀与sql一致,使用连续正整数
+
+多个仅执行(比如增删改刷新等)的sql语句请用;隔开,需要获取查询数据的语句请单独放在一个文件
+
+run.sql:仅一个需要获取查询数据的sql文件
+
+run.sql2:多个需要获取查询数据的sql文件
+}
+\usage{
+run.sql(sqls_path = "./sqls", exe = 0, get = 1, uid, pwd)
+}
+\arguments{
+  \item{sqls_path}{
+  存放sql文件夹的地址,默认为工作目录下面的sqls文件夹
+
+  请使用绝对地址或者相对地址(用./path表示工作目录下面的文件夹,../path表示与工作目录在同一路径的文件夹)
+}
+  \item{exe}{
+  仅需要执行的sql文件的sql编号,比如3,比如1:5,比如3:4
+
+  默认为0,没有仅需要执行的sql文件
+}
+  \item{get}{
+  run.sql: 需要获取查询数据的sql文件的sql编号(仅一个),比如3,比如5
+
+  run.sql2: 需要获取查询数据的sql文件的sql编号,比如1:2,比如3:5
+
+  默认为1,运行sql编号为1的sql文件,或者仅有的sql文件
+}
+  \item{uid}{
+  impala账号
+}
+  \item{pwd}{
+  impala密码
+}
+}
+\value{
+  run.sql: 从impala获取的数据,形式为data.frame
+
+  run.sql2: 从impala获取的数据,形式为list(data.frame,data.frame),即放入列表的数据框
+}
+
+\examples{
+```
+  工作目录下面的sqls文件夹中有如下文件
+
+  [1] "1_tmp_sqq_main.sql"        "2_tmp_sqq_mabl.sql"        "3_tmp_sqq_maru.sql"
+
+  [4] "4_tmp_sqq_macu.sql"        "5_tmp_sqq_maoth.sql"       "6_bak_sqq_custom_qual.sql"
+
+  [7] "7_getdata.sql"
+
+  其中"7_getdata.sql"放有需要获取查询数据的语句
+
+  ---------------------------------------------
+
+  library(sltool)
+
+  df <- run.sql(exe = 1:6, get = 7, uid = "xxxxxx", pwd = "xxxxxx")
+
+  ---------------------------------------------
+
+  工作目录下面的sqls文件夹中有如下文件
+
+  [1] "1_tmp_sqq_main.sql"        "2_getdata.sql"           "3_getdata.sql"
+
+  [4] "4_getdata.sql"
+
+  其中后三个放有需要获取查询数据的语句
+
+  ---------------------------------------------
+
+  library(sltool)
+
+  dflist <- run.sql(exe = 1, get = 2:4, uid = "xxxxxx", pwd = "xxxxxx")
+```
+}
+
+
+
+
+
+
+\name{csv_rep}
+\alias{csv_rep}
+\title{
+csv_rep
+}
+\description{
+根据放有csv文件的文件夹中读取编码表,将输入的编码返回对应的值
+可配合data.frame和data.table,按编码表替换整列数据
+}
+\usage{
+csv_rep(x, csvp = "./csvs", csvf, acol = 1, bcol = 2)
+}
+\arguments{
+  \item{x}{
+  输入的编码
+}
+  \item{csvp}{
+  csv所在文件夹的路径
+}
+  \item{csvf}{
+  csv文件名
+}
+  \item{acol}{
+  csv中编码所在列
+}
+  \item{bcol}{
+  csv中值所在列
+}
+}
+
+\value{
+  对应的值
+}
+
+
+
+
+
+
+
+
+
+
+
+\name{multiplot}
+\alias{multiplot}
+\title{
+multiplot
+}
+\description{
+将多个图表合并显示,基于grid包
+}
+\usage{
+multiplot(..., plotlist = NULL, cols = 1, layout = NULL)
+}
+\arguments{
+  \item{\dots}{
+多个plot对象(适用plot,ggplot2等)
+}
+  \item{plotlist}{
+含有多个plot对象的列表
+}
+  \item{cols}{
+每一行显示图表的数量
+}
+  \item{layout}{
+布局,参见grid的layout格式
+}
+}
+
+\value{
+
+}
+
+
+
+
+
+
+
+
+
+
+
+\name{to_excel}
+\alias{to_excel}
+\title{
+to_excel
+}
+\description{
+将多个data.frame和描述性语句根据所需格式生成excel
+}
+\usage{
+to_excel(output, xlpath = "test.xlsx", sheetname = "sheet", restyle = TRUE, pp_locs = 0, hl_locs = 0)
+}
+\arguments{
+  \item{output}{
+  元素为character或者data.frame的list
+
+  比如: list('文字1',df1,'文字2','文字3',df2,df3)
+}
+  \item{xlpath}{
+  需要导出的excel的完整文件名(包含路径)
+
+  比如: './excels/test.xlsx'
+}
+  \item{sheetname}{
+  excel的sheet名
+}
+  \item{restyle}{
+  TURE/FALSE, 是否需要更改格式
+}
+  \item{pp_locs}{
+  restyle=TRUE时填写,需要更改格式为百分数的单元格
+
+  形式为list(list(1,1),list(2:5,2),list(6,5:10))
+
+  内部list不支持的格式: list(1:5,1:5)
+}
+  \item{hl_locs}{
+  restyle=TRUE时填写,需要更改格式为高亮(highlight)的单元格
+
+  形式为list(list(1,1),list(2:5,2),list(6,5:10))
+
+  内部list不支持的格式: list(1:5,1:5)
+}
+}
+
+\value{
+  无返回值
+
+  在指定路径下生成excel
+}
+
+\examples{
+```
+# 数据放入output
+output <- list(
+  '申请量',
+  df1,
+  '通过率',
+  df2,
+  df3
+)
+# excelpath,sheetname,hl_locs,pp_locs
+xlpath <- "test.xlsx")
+sheetname <- 'test'
+hl_locs <- list(
+  list(1,1),
+  list(5,1)
+  )
+pp_locs <- list(
+  list(2,1:5),
+  list(3,1:5)
+  )
+# 输出excel
+to_excel(output,xlpath,sheetname,hl_locs=hl_locs, pp_locs=pp_locs)
+```
+}

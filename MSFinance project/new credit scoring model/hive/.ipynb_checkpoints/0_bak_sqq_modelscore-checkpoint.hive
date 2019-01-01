@@ -1,0 +1,46 @@
+DROP TABLE IF EXISTS risk_analysis.bak_sqq_modelscore;
+
+CREATE TABLE risk_analysis.bak_sqq_modelscore AS
+SELECT
+a.appl_no,
+-- 芝麻分
+cast(xpath_string(output,'/Application/extendSoureceLists[@data_source_code="Zhima_score" and @param_name="score"]/@param_value') AS float) Zhima_m,
+-- 马上芝麻分
+cast(xpath_string(output,'/Application/ZhimaMSXFScore/@modelScore') AS float) AS Zhimamsxf_m,
+-- 美业3.0
+cast(xpath_string(output,'/Application/@tempVector6_r') AS float) AS bt3_m,
+-- pboc聚信立
+cast(xpath_string(output,'/Application/pboc_juxinli_model/@resModdbl') AS float) AS pbjxl_m,
+-- 现金贷模型
+cast(xpath_string(output,'/Application/DT_cashloan_model/@resModdbl')  AS float) AS cashl_m,
+-- 商品贷聚信立v20
+cast(xpath_string(output,'/Application/R_JXL_MODEL/@jxl_pos_score_v20') AS float) AS posjxl20_m,
+-- 商品贷聚信立v21
+cast(xpath_string(output,'/Application/R_JXL_MODEL/@jxl_pos_score_v21') AS float) AS posjxl21_m,
+-- 分期模型
+cast(xpath_string(output,'/Application/Installment_Model/@resModdbl') AS float) AS ins_m,
+-- 聚信立
+cast(xpath_string(output,'/Application/POS_JXL_Model3/@jxlPosScoreV3') AS float) AS jxl_m,
+-- 银联分
+cast(xpath_string(output,'/Application/CUPJointModelingScore/@data') AS float) AS cup_m
+FROM
+dsst.gdl_aprvadt_det a
+LEFT JOIN
+dsst.fdl_aprvadt_luma_blaze_vect b 
+ON
+a.appl_id=b.appl_id 
+AND 
+b.round_par = '2c'
+AND 
+b.dt >= '20170416' 
+AND 
+b.dt <= '20180415'
+WHERE 
+a.prod_cd in ('3209','3210','3388','3389','3390','3391','3392','3393','3394','3395','3396','3397','3398','3399','3507','3508','3509','3530','3531','3532','3112','3113','3121','3123','3131','3132','3329','3333','3334','3335','3336','3339','3340','3385','3386','3387','3594','3595','3596','3119','3120','3325','3326','3328','3338','3383','3384','3124','3203','3204','3207','3208','3220','3221','3551','3403','3404','3405')
+AND
+a.dt='20180629' 
+AND
+to_date(a.appl_tm) >= '2017-04-16' 
+AND
+to_date(a.appl_tm) <= '2018-04-15'
+;

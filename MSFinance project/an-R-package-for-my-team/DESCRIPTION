@@ -1,0 +1,14 @@
+Package: sltool
+Version: 0.1.0
+Date: 2018-06-05
+Title: useful tools for slteam
+Author: slteam [slteam]
+Maintainer: slteam <qingqi.shi@msxf.com>
+Depends: R (>= 3.3.0)
+Imports: 
+    RODBC,
+    XLConnect, 
+    data.table, 
+    grid
+Description: slteam
+License: None
