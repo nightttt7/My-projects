@@ -1,39 +1,39 @@
--- 测试通过
--- 删除已有tmp_sqq_mabl表
+-- Test passed
+-- Delete existing tmp_sqq_mabl table
 DROP TABLE IF EXISTS risk_analysis.tmp_sqq_mabl;
--- 新建tmp_sqq_mabl表
+-- Create a new tmp_sqq_mabl table
 CREATE TABLE risk_analysis.tmp_sqq_mabl
 COMMENT 'main&blaze'
 STORED AS PARQUET
 AS
--- 创建内部表
+-- Create an internal table
 WITH
-blaze AS (
+Blaze AS (
 SELECT
-appl_no,
+Appl_no,
 tempVector6_r,
-pos_jxl_model3_jxlposscorev3
--- 待添加PBOC等信息
+Pos_jxl_model3_jxlposscorev3
+-- PBOC and other information to be added
 FROM
-fdl.fdl_aprvadt_blaze_application
+Fdl.fdl_aprvadt_blaze_application
 WHERE
-dt = '20180609'
--- dt = FROM_UNIXTIME(UNIX_TIMESTAMP()-86400,'yyyyMMdd')
+Dt = '20180609'
+-- dt = FROM_UNIXTIME(UNIX_TIMESTAMP()-86400, 'yyyyMMdd')
 AND
-round_par = 'blaze_ivk_Round3'
+Round_par = 'blaze_ivk_Round3'
 )
--- 查询语句块
+-- Query block
 SELECT
-main.*,
-blaze.tempVector6_r,
-blaze.pos_jxl_model3_jxlposscorev3
+Main.*,
+Blaze.tempVector6_r,
+Blaze.pos_jxl_model3_jxlposscorev3
 FROM
-risk_analysis.tmp_sqq_main AS main
+Risk_analysis.tmp_sqq_main AS main
 LEFT JOIN
-blaze
+Blaze
 ON
-blaze.appl_no = main.appl_no
+Blaze.appl_no = main.appl_no
 ;
--- SQL结束
--- 刷新
+-- SQL ends
+-- Refresh
 INVALIDATE METADATA risk_analysis.tmp_sqq_mabl;
