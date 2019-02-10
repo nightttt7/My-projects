@@ -1,80 +1,80 @@
--- 测试通过
--- 删除已有bak_sqq_custom_qual表
+-- Test passed
+-- Delete existing bak_sqq_custom_qual table
 DROP TABLE IF EXISTS risk_analysis.bak_sqq_custom_qual;
--- 刷新bak_sqq_modelscore表
+-- Refresh the bak_sqq_modelscore table
 INVALIDATE METADATA risk_analysis.bak_sqq_modelscore;
--- 新建已有bak_sqq_custom_qual表
-CREATE TABLE risk_analysis.bak_sqq_custom_qual 
-COMMENT '服务贷客群资质数据'
+-- Create a new bak_sqq_custom_qual table
+CREATE TABLE risk_analysis.bak_sqq_custom_qual
+COMMENT 'Service Credit Group Qualification Data'
 STORED AS PARQUET
 AS
--- 查询语句块
+-- Query block
 SELECT
-mabl.*,
-maru.rule_id_cat,
-maru.ops2ce,
-macu.gender_cd,
-macu.mo_earn,
-macu.oth_earn,
-macu.oth_loan,
-macu.currt_city,
-macu.edu_degree,
-macu.soc_id,
-macu.work_life,
-macu.unit_name,
-macu.unit_addr_city,
-macu.marg_status,
-macu.house_cond,
-maoth.mer_name,
-maoth.mer_status,
-maoth.max_dpd,
-maoth.curt_dpd,
-maoth.contra_status,
-maoth.curt_term,
-maoth.fpd,
-maoth.spd,
-maoth.tpd,
-maoth.qpd,
-maoth.fvpd,
-maoth.sxpd,
-maoth.svpd,
-maoth.etpd,
-maoth.nnpd,
-maoth.tnpd,
-maoth.evpd,
-maoth.twpd,
-maoth.xprod_cd,
-maoth.effc_start_dt,
-maoth.effc_end_dt,
-ms.age,
+Mabl.*,
+Maru.rule_id_cat,
+Maru.ops2ce,
+Macu.gender_cd,
+Macu.mo_earn,
+Macu.oth_earn,
+Macu.oth_loan,
+Macu.currt_city,
+Macu.edu_degree,
+Macu.soc_id,
+Macu.work_life,
+Macu.unit_name,
+Macu.unit_addr_city,
+Macu.marg_status,
+Macu.house_cond,
+Maoth.mer_name,
+Maoth.mer_status,
+Maoth.max_dpd,
+Maoth.curt_dpd,
+Maoth.contra_status,
+Maoth.curt_term,
+Maoth.fpd,
+Maoth.spd,
+Maoth.tpd,
+Maoth.qpd,
+Maoth.fvpd,
+Maoth.sxpd,
+Maoth.svpd,
+Maoth.etpd,
+Maoth.nnpd,
+Maoth.tnpd,
+Maoth.evpd,
+Maoth.twpd,
+Maoth.xprod_cd,
+Maoth.effc_start_dt,
+Maoth.effc_end_dt,
+Ms.age,
 ms.Zhima_m,
-ms.bt3_m,
-ms.pbjxl_m,
-ms.cashl_m,
-ms.posjxl20_m,
-ms.posjxl21_m,
-ms.ins_m,
-ms.jxl_m,
-ms.cup_m
+Ms.bt3_m,
+Ms.pbjxl_m,
+Ms.cashl_m,
+Ms.posjxl20_m,
+Ms.posjxl21_m,
+Ms.ins_m,
+Ms.jxl_m,
+Ms.cup_m
 FROM
-risk_analysis.tmp_sqq_mabl AS mabl
+Risk_analysis.tmp_sqq_mabl AS mabl
 JOIN
-risk_analysis.tmp_sqq_maru AS maru
+Risk_analysis.tmp_sqq_maru AS maru
 ON
-mabl.appl_no = maru.appl_no
+Mabl.appl_no = maru.appl_no
 JOIN
-risk_analysis.tmp_sqq_macu AS macu
+Risk_analysis.tmp_sqq_macu AS macu
 ON
-mabl.appl_no = macu.appl_no
+Mabl.appl_no = macu.appl_no
 JOIN
-risk_analysis.tmp_sqq_maoth AS maoth
+Risk_analysis.tmp_sqq_maoth AS maoth
 ON
-mabl.appl_no = maoth.appl_no
+Mabl.appl_no = maoth.appl_no
 LEFT JOIN
-risk_analysis.bak_sqq_modelscore AS ms
+Risk_analysis.bak_sqq_modelscore AS ms
 ON
-mabl.appl_no = ms.appl_no
+Mabl.appl_no = ms.appl_no
 ;
--- SQL结束
--- 刷新
+-- SQL ends
+-- Refresh
 INVALIDATE METADATA risk_analysis.bak_sqq_custom_qual;
