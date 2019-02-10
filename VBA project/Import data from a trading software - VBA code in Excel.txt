@@ -1,33 +1,33 @@
 Sub TBget()
 
-'准备工作及表头等
-        Application.ScreenUpdating = False '关闭屏幕刷新
-        Sheets(2).Cells.Clear        '清除单元格内容
-        Worksheets(1).Cells(1, 1) = "需要读取净利润线的文件路径写在下方"
-        Dim wjs As Long                     '获取文件数
+'prepare works
+        Application.ScreenUpdating = False 'turn off the ScreenUpdating
+        Sheets(2).Cells.Clear        'clear styles
+        Worksheets(1).Cells(1, 1) = "the path should write below"
+        Dim wjs As Long                     'get file num
         Worksheets(1).Select
         Cells(1, 1).Select
         wjs = (Selection.End(xlDown).Row - 1)
         
         
-'参数定义
-        Dim txt As String   '将ChartData.xml 文件中的一行临时储存为txt1
-        Dim i As Long        '循环变量1
-        Dim oper             '是否为净利润数据的读取开关
-        oper = 0             '赋初值为0，关
-        Dim arr             '存储未分列的净利润小时线
-        ReDim arr(1 To 99999)   '99999对应为40年左右，完全够用
-        Dim j As Long        '用于输出净利润数据的循环变量2
-        Dim k                '分列中间数
-        Dim l                '用于循环不同文件的循环变量3
-        Dim path As String   '文件地址字符串
-        Dim m                '用于文件输出
+'Parameter definition
+        Dim txt As String   'one line in ChartData.xml saved as txt1
+        Dim i As Long        'Loop variable 1
+        Dim oper             'is it net profit oper
+        oper = 0             'not net profit
+        Dim arr             'profit data
+        ReDim arr(1 To 99999)   '99999: 40 years
+        Dim j As Long        'Loop variable 2
+        Dim k                'mid variable
+        Dim l                'Loop variable 3
+        Dim path As String   'path
+        Dim m                'for output
 
 
 
-'净利润线数据输出
+'output profit
         For l = 1 To wjs
-            i = 1                '赋初值1
+            i = 1                'initial value 1
             path = Worksheets(1).Cells(l + 1, 1).Value
             Open path For Input As #1
             Do While Not EOF(1)
@@ -56,9 +56,9 @@ Sub TBget()
             Next j
         k = Split(Worksheets(1).Cells(l + 1, 1), "\")
         Worksheets(2).Cells(1, 2 * l) = k(1)
-        Worksheets(2).Cells(1, 2 * l - 1) = "日期"
+        Worksheets(2).Cells(1, 2 * l - 1) = "date"
         Next l
-'结束工作
-        Application.ScreenUpdating = True            '恢复屏幕刷新
+'end work
+        Application.ScreenUpdating = True            'turn on Screen Updating
         Worksheets(2).Select
 End Sub
