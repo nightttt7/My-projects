@@ -2,21 +2,21 @@
 \alias{sltool}
 \title{sltool}
 \usage{
-'请使用?函数名查看'
+'Please use? function name to view'
 }
 \description{
-服务贷实用函数,包含:
+Service loan utility function, including:
 
-get.sql:从放有sql文件的文件夹中读取sql查询语句,然后连接impala,运行sql语句,返回获取的数据;
+Get.sql: Read the sql query statement from the folder where the sql file is placed, then connect impala, run the sql statement, and return the obtained data;
 
-multiplot:将多个图表合并显示;
+Multiplot: combine multiple charts to display;
 
-to_excel:将多个data.frame和描述性语句根据所需格式生成excel;
+To_excel: generate multiple data.frame and descriptive statements according to the required format to generate excel;
 
-csv_rep:根据放有csv文件的文件夹中读取编码表,将输入的编码返回对应的值.
+Csv_rep: Read the encoding table according to the folder where the csv file is placed, and return the input encoding to the corresponding value.
 }
 \examples{
-'请使用?函数名查看'
+'Please use? function name to view'
 }
 
 
@@ -26,90 +26,90 @@ csv_rep:根据放有csv文件的文件夹中读取编码表,将输入的编码�
 \name{run.sql}
 \alias{run.sql}
 \title{
-run.sql
+Run.sql
 }
 \description{
-从放有sql文件的文件夹中读取sql查询语句,然后连接impala,运行sql语句,返回获取的数据
+Read the sql query statement from the folder where the sql file is placed, then connect impala, run the sql statement, and return the acquired data.
 
-包含两个版本:run.sql和run.sql2,区别见详情内容
+Contains two versions: run.sql and run.sql2, the difference is detailed
 
-文件夹中的sql文件(.txt,.sql等后缀均可)请按运行次序增加数字前缀,比如1_,2_,这个次序后面将称之为'sql编号'
+The sql file in the folder (.txt, .sql, etc. can be suffixed), please increase the number prefix in the order of operation, such as 1_, 2_, this order will be called 'sql number' later.
 
-为了方便操作,请保持数字前缀与sql一致,使用连续正整数
+For ease of operation, keep the numeric prefix consistent with sql, using consecutive positive integers
 
-多个仅执行(比如增删改刷新等)的sql语句请用;隔开,需要获取查询数据的语句请单独放在一个文件
+Use multiple SQL statements that only execute (such as adding, deleting, or refreshing, etc.). Separate the statements that need to get the query data. Please put them in a separate file.
 
-run.sql:仅一个需要获取查询数据的sql文件
+Run.sql: only one sql file that needs to get the query data
 
-run.sql2:多个需要获取查询数据的sql文件
+Run.sql2: multiple sql files that need to get query data
 }
 \usage{
-run.sql(sqls_path = "./sqls", exe = 0, get = 1, uid, pwd)
+Run.sql(sqls_path = "./sqls", exe = 0, get = 1, uid, pwd)
 }
 \arguments{
-  \item{sqls_path}{
-  存放sql文件夹的地址,默认为工作目录下面的sqls文件夹
+  \item{sqls_path}{
+  Store the address of the sql folder, the default is the sqls folder under the working directory
 
-  请使用绝对地址或者相对地址(用./path表示工作目录下面的文件夹,../path表示与工作目录在同一路径的文件夹)
+  Please use absolute address or relative address (use ./path for the folder below the working directory, ../path for the folder with the same path as the working directory)
 }
-  \item{exe}{
-  仅需要执行的sql文件的sql编号,比如3,比如1:5,比如3:4
+  \item{exe}{
+  Only need to execute the sql file sql number, such as 3, such as 1:5, such as 3:4
 
-  默认为0,没有仅需要执行的sql文件
+  The default is 0, there is no sql file that only needs to be executed.
 }
-  \item{get}{
-  run.sql: 需要获取查询数据的sql文件的sql编号(仅一个),比如3,比如5
+  \item{get}{
+  Run.sql: The sql number of the sql file that needs to get the query data (only one), such as 3, such as 5
 
-  run.sql2: 需要获取查询数据的sql文件的sql编号,比如1:2,比如3:5
+  Run.sql2: The sql number of the sql file that needs to get the query data, such as 1:2, such as 3:5
 
-  默认为1,运行sql编号为1的sql文件,或者仅有的sql文件
+  The default is 1, run sql file with sql number 1 or the only sql file
 }
-  \item{uid}{
-  impala账号
+  \item{uid}{
+  Impala account
 }
-  \item{pwd}{
-  impala密码
+  \item{pwd}{
+  Impala password
 }
 }
 \value{
-  run.sql: 从impala获取的数据,形式为data.frame
+  Run.sql: data obtained from impala in the form of data.frame
 
-  run.sql2: 从impala获取的数据,形式为list(data.frame,data.frame),即放入列表的数据框
+  Run.sql2: The data obtained from impala, in the form of list(data.frame, data.frame), which is the data frame put into the list.
 }
 
 \examples{
 ```
-  工作目录下面的sqls文件夹中有如下文件
+  The following file is in the sqls folder under the working directory.
 
-  [1] "1_tmp_sqq_main.sql"        "2_tmp_sqq_mabl.sql"        "3_tmp_sqq_maru.sql"
+  [1] "1_tmp_sqq_main.sql" "2_tmp_sqq_mabl.sql" "3_tmp_sqq_maru.sql"
 
-  [4] "4_tmp_sqq_macu.sql"        "5_tmp_sqq_maoth.sql"       "6_bak_sqq_custom_qual.sql"
+  [4] "4_tmp_sqq_macu.sql" "5_tmp_sqq_maoth.sql" "6_bak_sqq_custom_qual.sql"
 
-  [7] "7_getdata.sql"
+  [7] "7_getdata.sql"
 
-  其中"7_getdata.sql"放有需要获取查询数据的语句
+  Where "7_getdata.sql" has a statement that needs to get the query data.
 
-  ---------------------------------------------
+  ---------------------------------------------
 
-  library(sltool)
+  Library(sltool)
 
-  df <- run.sql(exe = 1:6, get = 7, uid = "xxxxxx", pwd = "xxxxxx")
+  Df <- run.sql(exe = 1:6, get = 7, uid = "xxxxxx", pwd = "xxxxxx")
 
-  ---------------------------------------------
+  ---------------------------------------------
 
-  工作目录下面的sqls文件夹中有如下文件
+  The following file is in the sqls folder under the working directory.
 
-  [1] "1_tmp_sqq_main.sql"        "2_getdata.sql"           "3_getdata.sql"
+  [1] "1_tmp_sqq_main.sql" "2_getdata.sql" "3_getdata.sql"
 
-  [4] "4_getdata.sql"
+  [4] "4_getdata.sql"
 
-  其中后三个放有需要获取查询数据的语句
+  The last three have statements that need to get the query data.
 
-  ---------------------------------------------
+  ---------------------------------------------
 
-  library(sltool)
+  Library(sltool)
 
-  dflist <- run.sql(exe = 1, get = 2:4, uid = "xxxxxx", pwd = "xxxxxx")
+  Dflist <- run.sql(exe = 1, get = 2:4, uid = "xxxxxx", pwd = "xxxxxx")
 ```
 }
 
@@ -121,35 +121,35 @@ run.sql(sqls_path = "./sqls", exe = 0, get = 1, uid, pwd)
 \name{csv_rep}
 \alias{csv_rep}
 \title{
-csv_rep
+Csv_rep
 }
 \description{
-根据放有csv文件的文件夹中读取编码表,将输入的编码返回对应的值
-可配合data.frame和data.table,按编码表替换整列数据
+Read the encoding table according to the folder in which the csv file is placed, and return the input encoding to the corresponding value.
+Can be combined with data.frame and data.table, replace the entire column of data by coding table
 }
 \usage{
-csv_rep(x, csvp = "./csvs", csvf, acol = 1, bcol = 2)
+Csv_rep(x, csvp = "./csvs", csvf, acol = 1, bcol = 2)
 }
 \arguments{
-  \item{x}{
-  输入的编码
+  \item{x}{
+  Input code
 }
-  \item{csvp}{
-  csv所在文件夹的路径
+  \item{csvp}{
+  Path to the folder where csv is located
 }
-  \item{csvf}{
-  csv文件名
+  \item{csvf}{
+  Csv file name
 }
-  \item{acol}{
-  csv中编码所在列
+  \item{acol}{
+  Csv encoding in the column
 }
-  \item{bcol}{
-  csv中值所在列
+  \item{bcol}{
+  Csv median column
 }
 }
 
 \value{
-  对应的值
+  Corresponding value
 }
 
 
@@ -165,26 +165,26 @@ csv_rep(x, csvp = "./csvs", csvf, acol = 1, bcol = 2)
 \name{multiplot}
 \alias{multiplot}
 \title{
-multiplot
+Multiplot
 }
 \description{
-将多个图表合并显示,基于grid包
+Combine multiple charts to display, based on the grid package
 }
 \usage{
-multiplot(..., plotlist = NULL, cols = 1, layout = NULL)
+Multiplot(..., plotlist = NULL, cols = 1, layout = NULL)
 }
 \arguments{
-  \item{\dots}{
-多个plot对象(适用plot,ggplot2等)
+  \item{\dots}{
+Multiple plot objects (for plot, ggplot2, etc.)
 }
-  \item{plotlist}{
-含有多个plot对象的列表
+  \item{plotlist}{
+a list of multiple plot objects
 }
-  \item{cols}{
-每一行显示图表的数量
+  \item{cols}{
+The number of charts displayed per line
 }
-  \item{layout}{
-布局,参见grid的layout格式
+  \item{layout}{
+Layout, see grid layout format
 }
 }
 
@@ -205,75 +205,75 @@ multiplot(..., plotlist = NULL, cols = 1, layout = NULL)
 \name{to_excel}
 \alias{to_excel}
 \title{
-to_excel
+To_excel
 }
 \description{
-将多个data.frame和描述性语句根据所需格式生成excel
+Generate multiple excels of data.frame and descriptive statements according to the required format
 }
 \usage{
-to_excel(output, xlpath = "test.xlsx", sheetname = "sheet", restyle = TRUE, pp_locs = 0, hl_locs = 0)
+To_excel(output, xlpath = "test.xlsx", sheetname = "sheet", restyle = TRUE, pp_locs = 0, hl_locs = 0)
 }
 \arguments{
-  \item{output}{
-  元素为character或者data.frame的list
+  \item{output}{
+  The list of elements is character or data.frame
 
-  比如: list('文字1',df1,'文字2','文字3',df2,df3)
+  For example: list('text 1', df1, 'text 2', 'text 3', df2, df3)
 }
-  \item{xlpath}{
-  需要导出的excel的完整文件名(包含路径)
+  \item{xlpath}{
+  The full file name of the excel that needs to be exported (including the path)
 
-  比如: './excels/test.xlsx'
+  For example: './excels/test.xlsx'
 }
-  \item{sheetname}{
-  excel的sheet名
+  \item{sheetname}{
+  Excel sheet name
 }
-  \item{restyle}{
-  TURE/FALSE, 是否需要更改格式
+  \item{restyle}{
+  TURE/FALSE, do you need to change the format?
 }
-  \item{pp_locs}{
-  restyle=TRUE时填写,需要更改格式为百分数的单元格
+  \item{pp_locs}{
+  Fill in restyle=TRUE, you need to change the format to a percentage of cells
 
-  形式为list(list(1,1),list(2:5,2),list(6,5:10))
+  The form is list(list(1,1),list(2:5,2),list(6,5:10))
 
-  内部list不支持的格式: list(1:5,1:5)
+  The format not supported by the internal list: list(1:5, 1:5)
 }
-  \item{hl_locs}{
-  restyle=TRUE时填写,需要更改格式为高亮(highlight)的单元格
+  \item{hl_locs}{
+  Fill in restyle=TRUE, you need to change the cell formatted as highlight (highlight)
 
-  形式为list(list(1,1),list(2:5,2),list(6,5:10))
+  The form is list(list(1,1),list(2:5,2),list(6,5:10))
 
-  内部list不支持的格式: list(1:5,1:5)
+  The format not supported by the internal list: list(1:5, 1:5)
 }
 }
 
 \value{
-  无返回值
+  No return value
 
-  在指定路径下生成excel
+  Generate excel under the specified path
 }
 
 \examples{
 ```
-# 数据放入output
-output <- list(
-  '申请量',
-  df1,
-  '通过率',
-  df2,
-  df3
+#data to output
+Output <- list(
+  'Application amount',
+  Df1,
+  'Passing rate',
+  Df2,
+  Df3
 )
 # excelpath,sheetname,hl_locs,pp_locs
-xlpath <- "test.xlsx")
-sheetname <- 'test'
-hl_locs <- list(
-  list(1,1),
-  list(5,1)
-  )
-pp_locs <- list(
-  list(2,1:5),
-  list(3,1:5)
-  )
-# 输出excel
-to_excel(output,xlpath,sheetname,hl_locs=hl_locs, pp_locs=pp_locs)
+Xlpath <- "test.xlsx")
+Sheetname <- 'test'
+Hl_locs <- list(
+  List(1,1),
+  List(5,1)
+  )
+Pp_locs <- list(
+  List(2,1:5),
+  List(3,1:5)
+  )
+#output to excel
+To_excel(output,xlpath,sheetname,hl_locs=hl_locs, pp_locs=pp_locs)
 ```
 }
