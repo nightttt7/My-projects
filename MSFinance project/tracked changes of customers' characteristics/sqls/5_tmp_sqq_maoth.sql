@@ -1,113 +1,113 @@
--- 未测试
--- 删除已有tmp_sqq_maoth表
+-- not tested
+-- Delete existing tmp_sqq_maoth table
 DROP TABLE IF EXISTS risk_analysis.tmp_sqq_maoth;
--- 新建tmp_sqq_maoth表
+-- Create a new tmp_sqq_maoth table
 CREATE TABLE risk_analysis.tmp_sqq_maoth
 COMMENT 'main&others(gdl_risk_triangle,gdl_mer_struc,gdl_cust_info)'
 STORED AS PARQUET
 AS
--- 创建内部表
+-- Create an internal table
 WITH
-main AS (
+Main AS (
 SELECT
-appl_no,
-mer_no,
-union_id,
-contra_no
+Appl_no,
+Mer_no,
+Union_id,
+Contra_no
 FROM
-risk_analysis.tmp_sqq_main
+Risk_analysis.tmp_sqq_main
 ),
-mer AS (
+Mer AS (
 SELECT
-mer_no,
-mer_name,
-mer_status
+Mer_no,
+Mer_name,
+Mer_status
 FROM
-dsst.gdl_mer_struc
+Dsst.gdl_mer_struc
 WHERE
-dt = '20180609'
--- dt = FROM_UNIXTIME(UNIX_TIMESTAMP()-86400,'yyyyMMdd')
+Dt = '20180609'
+-- dt = FROM_UNIXTIME(UNIX_TIMESTAMP()-86400, 'yyyyMMdd')
 ),
-triangle AS (
+Triangle AS (
 SELECT
-contra_no,
-max_dpd,
-curt_dpd,
-contra_status,
-curt_term,
-fpd,
-spd,
-tpd,
-qpd,
-fvpd,
-sxpd,
-svpd,
-etpd,
-nnpd,
-tnpd,
-evpd,
-twpd
+Contra_no,
+Max_dpd,
+Curt_dpd,
+Contra_status,
+Curt_term,
+Fpd,
+Spd,
+Tpd,
+Qpd,
+Fvpd,
+Sxpd,
+Svpd,
+Etpd,
+Nnpd,
+Tnpd,
+Evpd,
+Twpd
 FROM
-dsst.gdl_risk_triangle
+Dsst.gdl_risk_triangle
 WHERE
-dt = '20180609'
--- dt = FROM_UNIXTIME(UNIX_TIMESTAMP()-86400,'yyyyMMdd')
+Dt = '20180609'
+-- dt = FROM_UNIXTIME(UNIX_TIMESTAMP()-86400, 'yyyyMMdd')
 ),
-xsell AS (
+Xsell AS (
 SELECT
-union_id,
-prod_cd,
-effc_start_dt,
-effc_end_dt
+Union_id,
+Prod_cd,
+Effc_start_dt,
+Effc_end_dt
 FROM
-dsst.fdl_cam_uds_x_sell_chain
+Dsst.fdl_cam_uds_x_sell_chain
 WHERE
 CHAIN_STATUS='active'
 AND
-end_date = '47121231'
+End_date = '47121231'
 )
--- 查询语句块
+-- Query block
 SELECT
-main.appl_no,
-main.mer_no,
-main.union_id,
-main.contra_no,
-mer.mer_name,
-mer.mer_status,
-triangle.max_dpd,
-triangle.curt_dpd,
-triangle.contra_status,
-triangle.curt_term,
-triangle.fpd,
-triangle.spd,
-triangle.tpd,
-triangle.qpd,
-triangle.fvpd,
-triangle.sxpd,
-triangle.svpd,
-triangle.etpd,
-triangle.nnpd,
-triangle.tnpd,
-triangle.evpd,
-triangle.twpd,
-xsell.prod_cd AS 'xprod_cd',
-xsell.effc_start_dt,
-xsell.effc_end_dt
+Main.appl_no,
+Main.mer_no,
+Main.union_id,
+Main.contra_no,
+Mer.mer_name,
+Mer.mer_status,
+Triangle.max_dpd,
+Triangle.curt_dpd,
+Triangle.contra_status,
+Triangle.curt_term,
+Triangle.fpd,
+Triangle.spd,
+Triangle.tpd,
+Triangle.qpd,
+Triangle.fvpd,
+Triangle.sxpd,
+Triangle.svpd,
+Triangle.etpd,
+Triangle.nnpd,
+Triangle.tnpd,
+Triangle.evpd,
+Triangle.twpd,
+Xsell.prod_cd AS 'xprod_cd',
+Xsell.effc_start_dt,
+Xsell.effc_end_dt
 FROM
-main
+Main
 LEFT JOIN
-mer
+Mer
 ON
-main.mer_no = mer.mer_no
+Main.mer_no = mer.mer_no
 LEFT JOIN
-triangle
+Triangle
 ON
-main.contra_no = triangle.contra_no
+Main.contra_no = triangle.contra_no
 LEFT JOIN
-xsell
+Xsell
 ON
-main.union_id = xsell.union_id
+Main.union_id = xsell.union_id
 ;
--- SQL结束
--- 刷新
+-- SQL ends
+-- Refresh
 INVALIDATE METADATA risk_analysis.tmp_sqq_maoth;
