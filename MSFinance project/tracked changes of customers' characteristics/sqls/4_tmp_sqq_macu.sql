@@ -1,63 +1,63 @@
--- 测试通过
--- 删除已有tmp_sqq_macu表
+-- Test passed
+-- Delete existing tmp_sqq_macu table
 DROP TABLE IF EXISTS risk_analysis.tmp_sqq_macu;
--- 新建tmp_sqq_macu表
+-- Create a new tmp_sqq_macu table
 CREATE TABLE risk_analysis.tmp_sqq_macu
 COMMENT 'wholemain&customchain'
 STORED AS PARQUET
 AS
--- 创建内部表
+-- Create an internal table
 WITH
-main AS (
+Main AS (
 SELECT
-appl_no
+Appl_no
 FROM
-risk_analysis.tmp_sqq_main
+Risk_analysis.tmp_sqq_main
 ),
-cust AS (
+Cust AS (
 SELECT
-app_no,
-gender_cd,
-mo_earn,
-oth_earn,
-oth_loan,
-currt_city,
-edu_degree,
-soc_id,
-work_life,
-unit_name,
-unit_addr_city,
-marg_status,
-house_cond
+App_no,
+Gender_cd,
+Mo_earn,
+Oth_earn,
+Oth_loan,
+Currt_city,
+Edu_degree,
+Soc_id,
+Work_life,
+Unit_name,
+Unit_addr_city,
+Marg_status,
+House_cond
 FROM
-dsst.fdl_cust_prim_appl_chain
+Dsst.fdl_cust_prim_appl_chain
 WHERE
 CHAIN_STATUS='active'
 AND
-end_date = '47121231'
+End_date = '47121231'
 )
--- 查询语句块
+-- Query block
 SELECT
-main.appl_no,
-cust.gender_cd,
-cust.mo_earn,
-cust.oth_earn,
-cust.oth_loan,
-cust.currt_city,
-cust.edu_degree,
-cust.soc_id,
-cust.work_life,
-cust.unit_name,
-cust.unit_addr_city,
-cust.marg_status,
-cust.house_cond
+Main.appl_no,
+Cust.gender_cd,
+Cust.mo_earn,
+Cust.oth_earn,
+Cust.oth_loan,
+Cust.currt_city,
+Cust.edu_degree,
+Cust.soc_id,
+Cust.work_life,
+Cust.unit_name,
+Cust.unit_addr_city,
+Cust.marg_status,
+Cust.house_cond
 FROM
-main
+Main
 LEFT JOIN
-cust
+Cust
 ON
-main.appl_no = cust.app_no
+Main.appl_no = cust.app_no
 ;
--- SQL结束
--- 刷新
+-- SQL ends
+-- Refresh
 INVALIDATE METADATA risk_analysis.tmp_sqq_macu;
