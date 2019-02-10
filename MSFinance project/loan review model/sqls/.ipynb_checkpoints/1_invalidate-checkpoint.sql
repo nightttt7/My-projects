@@ -1,1 +1,0 @@
-INVALIDATE METADATA risk_analysis.tmp_xxx_xxxmodel;
