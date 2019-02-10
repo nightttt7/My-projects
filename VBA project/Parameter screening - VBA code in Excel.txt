@@ -1,21 +1,21 @@
-Sub 最优参数筛选()
-    Application.ScreenUpdating = False '关闭屏幕更新，提供运行效率
+Sub bestpara()
+    Application.ScreenUpdating = False 'turn off Screen Updating
 
-    Dim i As Long         '循环等变量
+    Dim i As Long         'loop vars
     Dim j As Long
     Dim k As Long
     
-    Dim PCount As Long    '原始参数个数
-    Dim PColArr() As Long '参数列号
+    Dim PCount As Long    'original para num
+    Dim PColArr() As Long 'para col
     
-    Dim TCount As Long    '优化参数个数
-    Dim TColArr() As Long '优化参数列号
+    Dim TCount As Long    'para num
+    Dim TColArr() As Long 'para col
     
-    Dim TarName As String    '目标函数
-    Dim TarCol1 As Integer   'Sheet2目标函数列
-    Dim TarCol2 As Integer   'Sheet3目标函数列
+    Dim TarName As String    'target func
+    Dim TarCol1 As Integer   'Sheet2 target func
+    Dim TarCol2 As Integer   'Sheet3 target func
     
-    Dim FRange As Integer    '筛选名次
+    Dim FRange As Integer    'rank
     Dim TotalRow As Long
 
     
@@ -27,7 +27,7 @@ Sub 最优参数筛选()
     Set MySheet6 = ThisWorkbook.Worksheets("Sheet6")
     
     
-    '==========获取配置参数==========
+    '==========get parameter for this program==========
     PCount = MySheet1.Cells(2, 1)
     TCount = MySheet1.Cells(4, 1)
     TarName = MySheet1.Cells(6, 1)
@@ -44,7 +44,7 @@ Sub 最优参数筛选()
     Next i
     
     FindC = 0
-    '==========获取目标函数列
+    '==========get target func col
     For i = 1 To 255
        cFName = MySheet2.Cells(1, i)
        If StrComp(TarName, cFName, vbTextCompare) = 0 Then
@@ -69,7 +69,7 @@ Sub 最优参数筛选()
     MySheet6.Select
     Cells.Clear
     
-    '复制行头
+    'copy first row
     MySheet3.Select
     Range(Cells(1, 1), Cells(1, PCount + TCount + 1)).Select
     Selection.Copy
@@ -80,7 +80,7 @@ Sub 最优参数筛选()
         
     TotalRow = MySheet2.Cells(Application.Rows.Count, 1).End(xlUp).Row
     
-    'Sheet5数据复制行
+    'Sheet5 data copy row num
     S5Row = 2
     
     For i = 2 To TotalRow
@@ -91,7 +91,7 @@ Sub 最优参数筛选()
          Cells.Select
          Selection.AutoFilter
          
-         ' 筛选条件
+         ' Filter condition
          For j = 1 To PCount
             PValue = MySheet2.Cells(i, PColArr(j))
             Selection.AutoFilter Field:=PColArr(j), Criteria1:=PValue
@@ -107,7 +107,7 @@ Sub 最优参数筛选()
         Application.CutCopyMode = False
         
         
-        '按照目标函数降序
+        'Descending according to the objective function
         MySheet4.Select
         Cells.Select
         Selection.Sort Key1:=Cells(1, TarCol2), Order1:=xlDescending, Header:=xlYes
@@ -126,13 +126,13 @@ Sub 最优参数筛选()
     'Sheet5
     
     
-    '复制行头
+    'copy first row
     For i = 1 To TCount
         MySheet6.Cells(1, i) = MySheet5.Cells(1, PCount + i)
     Next i
     
-    MySheet6.Cells(1, TCount + 1) = "次数"
-    MySheet6.Cells(1, TCount + 2) = "比例"
+    MySheet6.Cells(1, TCount + 1) = "times"
+    MySheet6.Cells(1, TCount + 2) = "proportion"
     
     Dim TKey As String
     Dim KeyArr() As String
@@ -181,7 +181,7 @@ Sub 最优参数筛选()
         MySheet6.Cells(i, TCount + 2) = Round(MySheet6.Cells(i, TCount + 1) / SumCount, 2)
     Next i
     
-     '按照目标函数降序
+     'Descending according to the objective function
     MySheet6.Select
     Cells.Select
     Selection.Sort Key1:=Cells(1, TCount + 1), Order1:=xlDescending, Header:=xlYes
@@ -192,10 +192,10 @@ Sub 最优参数筛选()
     Selection.AutoFilter
          
      MySheet6.Select
-    Application.ScreenUpdating = True '恢复屏幕更新
+    Application.ScreenUpdating = True 'turn on Screen Updating
 End Sub
 
-'字符串数组包含
+'String array contains
 Function ArrContain(t As Variant, Str As String)
   Dim Res As Integer
   Dim i As Integer
