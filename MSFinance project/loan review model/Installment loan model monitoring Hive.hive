@@ -1,0 +1,35 @@
+/*xxx model monitoring Hive*/
+DROP TABLE IF EXISTS risk_analysis.tmp_xxx_xxxmodel;
+CREATE TABLE risk_analysis.tmp_xxx_xxxmodel AS
+SELECT
+Substr(a.appl_tm,1,10) appl_tm ,
+A.appl_no appl_no,
+A.appl_status appl_status,
+A.appl_lim appl_lim,
+Cast(xpath_string(output,'/Application/@xxx') AS float) bt3_score,
+Cast(xpath_string(output,'/Application/xxx/@xxx') AS float)jxlPosScoreV3,
+Xpath_string(output,'/Application/xxx/@xxx') AS workflowCode
+FROM
+Dsst.gdl_xxx_xxx a
+LEFT JOIN
+Dsst.fdl_aprvadt_xxx_xxx_xxx b
+ON
+A.appl_id=b.appl_id
+AND
+B.round_par = '2c'
+AND
+B.dt >= 'xxxxxxxx'
+AND
+# Date parameter 1
+B.dt <= 'xxxxxxxx'
+WHERE
+A.prod_cd IN ('0000', '0000', '0000')
+AND
+# Date parameter 2
+A.dt='xxxxxxxx'
+AND
+To_date(a.appl_tm) >= 'xxxxxxxx'
+AND
+# Date parameter 3
+To_date(a.appl_tm) <= 'xxxxxxxx'
+;
