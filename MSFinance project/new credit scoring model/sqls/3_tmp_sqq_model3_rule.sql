@@ -45,4 +45,4 @@ ON
 main.appl_no = rule.appl_no
 ;
 INVALIDATE METADATA risk_analysis.tmp_sqq_model3_rule;
--- 测试通过
+-- Test pass
