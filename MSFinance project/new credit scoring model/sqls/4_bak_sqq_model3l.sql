@@ -46,4 +46,4 @@ ON
 rule.appl_no = modelscore.appl_no
 ;
 INVALIDATE METADATA risk_analysis.bak_sqq_model3;
--- 测试通过
+-- Test pass
