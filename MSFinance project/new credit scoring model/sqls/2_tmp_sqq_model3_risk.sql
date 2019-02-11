@@ -33,4 +33,4 @@ ON
 main.contra_no = triangle.contra_no
 ;
 INVALIDATE METADATA risk_analysis.tmp_sqq_model3_risk;
--- 测试完成
+-- Test pass
