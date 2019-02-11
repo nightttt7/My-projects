@@ -26,4 +26,4 @@ jxl_m,
 cup_m 
 FROM risk_analysis.bak_sqq_model3
 ;
--- 测试通过
+-- Test pass
