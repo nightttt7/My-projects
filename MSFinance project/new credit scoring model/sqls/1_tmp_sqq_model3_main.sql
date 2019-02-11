@@ -27,4 +27,4 @@ AND '2018-04-15'
 )
 ;
 INVALIDATE METADATA risk_analysis.tmp_sqq_model3_main;
--- 测试通过
+-- Test pass
