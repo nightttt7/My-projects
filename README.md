@@ -14,3 +14,9 @@
     - chapter 4: Forecast the IPO Market Using Logistic Regression
     - Chapter 7: Use Machine Learning to Forecast the Stock Market
     - Chapter 8: Classifying Images with Convolutional Neural Networks
+    
+### Open source projects
+1. [minimu](https://github.com/nightttt7/minimu): a small, hidden and clean lightweight music player in python commands
+2. [MySQL-tutorial](https://github.com/nightttt7/MySQL-tutorial): a tutorial of MySQL database for beginners (In Chinese)
+3. [Rweekends](https://github.com/nightttt7/Rweekends): A tutorial of using R to do data analysis and statistics analysis (In Chinese)
+4. [dataconvert](https://github.com/nightttt7/dataconvert/tree/master/esp): transform excel/sql/pandas to each other and analyze product data or similar, sometimes you must use excel, but you like pandas and sql more, use esp
