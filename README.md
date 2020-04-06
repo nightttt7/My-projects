@@ -1,4 +1,4 @@
-### The projects I completed, including working projects, learning projects.
+### work related projects
 
 1. VBA project
       - I wrote some code in VBA-Excel when I work at TaoMicro Investment. They are pretty useful for me and my colleagues. Here are some of them.
